@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart' hide ContextExtensionss;
-import 'package:get/get_navigation/get_navigation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:simple_circular_progress_bar/simple_circular_progress_bar.dart';
 import 'package:tiktok_app_clone_flutter/core/enums/route_enum.dart';
@@ -109,10 +106,13 @@ class _LoginViewState extends State<LoginView> {
                                     showProgressBar == true;
                                   });
                                   //login usr now
-                                  authController.login(
-                                    emailController.text.trim(),
-                                    passwordController.text.trim(),
-                                  );
+                                  if (emailController.text.isNotEmpty &&
+                                      passwordController.text.isNotEmpty) {
+                                    authController.login(
+                                      emailController.text.trim(),
+                                      passwordController.text.trim(),
+                                    );
+                                  }
                                 },
                                 child: const Center(
                                   child: Text(
