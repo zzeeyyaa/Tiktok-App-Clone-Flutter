@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tiktok_app_clone_flutter/core/utils/global_var.dart';
 import 'package:tiktok_app_clone_flutter/src/view/auth/login_view.dart';
 import 'package:tiktok_app_clone_flutter/src/view/auth/registration_view.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/home_view.dart';
 import '../model/user.dart' as usermodel;
 
 class AuthController extends GetxController {
@@ -18,6 +19,8 @@ class AuthController extends GetxController {
   late Rx<File?> _pickedFile = Rx<File?>(null);
 
   File? get profileImage => _pickedFile.value;
+
+  late Rx<User?> _currentUser;
 
   void chooseImageFromGallery() async {
     final imagePickedFile =
@@ -86,6 +89,21 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<String> uploadImageToStorage(File imageFile) async {
+    Reference reference = FirebaseStorage.instance
+        .ref()
+        .child("Profile Images")
+        .child(FirebaseAuth.instance.currentUser!.uid);
+
+    UploadTask uploadTask = reference.putFile(imageFile);
+
+    TaskSnapshot taskSnapshot = await uploadTask;
+
+    String downloadUrlOfUploadImage = await taskSnapshot.ref.getDownloadURL();
+
+    return downloadUrlOfUploadImage;
+  }
+
   void login(String email, String password) async {
     try {
       showProgressBar = true;
@@ -105,18 +123,18 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<String> uploadImageToStorage(File imageFile) async {
-    Reference reference = FirebaseStorage.instance
-        .ref()
-        .child("Profile Images")
-        .child(FirebaseAuth.instance.currentUser!.uid);
+  goToScreen(User? currentUser) {
+    if (currentUser == null) {
+      Get.offAll(const LoginView());
+    } else {
+      Get.offAll(const HomeView());
+    }
+  }
 
-    UploadTask uploadTask = reference.putFile(imageFile);
+  @override
+  void onReady() {
+    super.onReady();
 
-    TaskSnapshot taskSnapshot = await uploadTask;
-
-    String downloadUrlOfUploadImage = await taskSnapshot.ref.getDownloadURL();
-
-    return downloadUrlOfUploadImage;
+    _currentUser = Rx<User?>(FirebaseAuth.instance.currentUser);
   }
 }
