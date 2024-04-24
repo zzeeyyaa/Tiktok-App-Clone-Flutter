@@ -1,0 +1,4 @@
+enum RouteName {
+  login,
+  regist,
+}
