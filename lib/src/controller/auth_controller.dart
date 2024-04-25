@@ -91,7 +91,7 @@ class AuthController extends GetxController {
   Future<String> uploadImageToStorage(File imageFile) async {
     Reference reference = FirebaseStorage.instance
         .ref()
-        .child("Profile Images")
+        .child('Profile Images')
         .child(FirebaseAuth.instance.currentUser!.uid);
 
     UploadTask uploadTask = reference.putFile(imageFile);

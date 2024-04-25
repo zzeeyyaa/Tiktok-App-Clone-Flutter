@@ -3,7 +3,7 @@ import 'package:tiktok_app_clone_flutter/src/view/home/following/following_video
 import 'package:tiktok_app_clone_flutter/src/view/home/for_you/for_you_video_view.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/profile/profile_view.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/search/search_view.dart';
-import 'package:tiktok_app_clone_flutter/src/view/home/upload_video/upload_custom_icon.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/upload_video/widgets/upload_custom_icon.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/upload_video/upload_video_view.dart';
 
 class HomeView extends StatefulWidget {
