@@ -3,11 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:video_compress/video_compress.dart';
 import 'package:tiktok_app_clone_flutter/core/utils/global_var.dart';
-import 'package:tiktok_app_clone_flutter/core/utils/typedefs.dart';
 import 'package:tiktok_app_clone_flutter/src/model/video.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/home_view.dart';
-import 'package:video_compress/video_compress.dart';
 
 class UploadController extends GetxController {
   compressedVideoFile(String videoFilePath) async {
@@ -101,9 +100,9 @@ class UploadController extends GetxController {
       Get.snackbar(
           'New Video', 'You have successfully uploaded your new video');
     } catch (e) {
+      showProgressBar = false;
       Get.snackbar("Video Upload Unsuccessfull",
           "Error occurred, your video is not uploaded. Try Again.");
-      showProgressBar = false;
     }
   }
 }

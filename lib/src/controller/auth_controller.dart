@@ -114,7 +114,7 @@ class AuthController extends GetxController {
         'you are logged-in successfully',
         backgroundColor: Colors.deepPurple.shade200.withOpacity(.5),
       );
-      Get.to(const RegistView());
+      Get.to(const HomeView());
     } catch (e) {
       Get.snackbar('Error during login', 'Error: $e');
       showProgressBar = false;
