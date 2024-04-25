@@ -1,3 +1,3 @@
 # tiktok_app_clone_flutter
 
-A new Flutter project.
+Thanks to : Coding Cafe -Udemy
