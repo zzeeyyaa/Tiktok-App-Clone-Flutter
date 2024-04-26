@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tiktok_app_clone_flutter/core/widgets/circular_image_animation.dart';
 import 'package:tiktok_app_clone_flutter/core/widgets/custom_video_player.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/comments_controller.dart';
 import 'package:tiktok_app_clone_flutter/src/controller/for_you_video_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/comments/comments_bottom_sheet.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/comments/comments_view.dart';
 
 class ForYouVideoView extends StatefulWidget {
   const ForYouVideoView({super.key});
@@ -17,9 +21,12 @@ class ForYouVideoView extends StatefulWidget {
 class _ForYouVideoViewState extends State<ForYouVideoView> {
   ForYouVideoController forYouVideoController =
       Get.put(ForYouVideoController());
+  CommentsController commentsController = Get.put(CommentsController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Obx(() {
         return PageView.builder(
           itemCount: forYouVideoController.forYouAllVideoList.length,
@@ -96,7 +103,7 @@ class _ForYouVideoViewState extends State<ForYouVideoView> {
                           //*right panel
                           Container(
                             width: 100,
-                            margin: EdgeInsets.only(top: context.height / 3),
+                            margin: EdgeInsets.only(top: context.height * .35),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
@@ -134,7 +141,10 @@ class _ForYouVideoViewState extends State<ForYouVideoView> {
                                 Column(
                                   children: [
                                     IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        forYouVideoController.likeOrUnlikeVideo(
+                                            eachVideoInfo.videoID.toString());
+                                      },
                                       icon: Icon(
                                         Icons.favorite_rounded,
                                         size: 32,
@@ -163,7 +173,17 @@ class _ForYouVideoViewState extends State<ForYouVideoView> {
                                 Column(
                                   children: [
                                     IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        commentsController.updateCurrentVideoID(
+                                            eachVideoInfo.videoID.toString());
+                                        // Get.to(
+                                        //   CommentsView(
+                                        //     videoID: eachVideoInfo.videoID
+                                        //         .toString(),
+                                        //   ),
+                                        // );
+                                        showCommentBottomSheet(context);
+                                      },
                                       icon: const Icon(
                                         Icons.add_comment,
                                         size: 32,

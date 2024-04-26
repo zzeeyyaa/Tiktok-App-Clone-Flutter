@@ -122,6 +122,37 @@ class AuthController extends GetxController {
     }
   }
 
+  void getUserInfo() {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      String email = currentUser.email!;
+      String uid = currentUser.uid;
+      // Dapatkan informasi tambahan dari Firestore atau penyimpanan lainnya
+      // Misalnya, jika Anda memiliki koleksi 'users' di Firestore, Anda dapat mengambil dokumen pengguna berdasarkan UID-nya
+      FirebaseFirestore.instance.collection('users').doc(uid).get().then((doc) {
+        if (doc.exists) {
+          // Dokumen pengguna ditemukan, Anda dapat mengambil informasi tambahan dari sini
+          String username = doc['username'];
+          String profileImageURL = doc['profileImageURL'];
+          // Lakukan sesuatu dengan informasi pengguna yang sudah Anda dapatkan
+          print('Email: $email');
+          print('UID: $uid');
+          print('Username: $username');
+          print('Profile Image URL: $profileImageURL');
+        } else {
+          // Dokumen pengguna tidak ditemukan
+          print('Dokumen pengguna tidak ditemukan');
+        }
+      }).catchError((error) {
+        // Penanganan kesalahan jika gagal mengambil dokumen pengguna dari Firestore
+        print('Error: $error');
+      });
+    } else {
+      // Pengguna tidak login
+      print('Pengguna tidak login');
+    }
+  }
+
   goToScreen(User? currentUser) {
     if (currentUser == null) {
       Get.offAll(const LoginView());
