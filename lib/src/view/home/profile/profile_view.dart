@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,12 +20,39 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   ProfileController profileController = Get.put(ProfileController());
+  bool isFollowingUser = false;
 
   @override
   void initState() {
     super.initState();
 
     profileController.updateCurrentUserID(widget.visitUserID.toString());
+
+    getIsFollowingValue();
+  }
+
+  Future<void> refreshData() async {
+    await getIsFollowingValue();
+  }
+
+  getIsFollowingValue() {
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.visitUserID.toString())
+        .collection('followers')
+        .doc(currentUserID)
+        .get()
+        .then((value) {
+      if (value.exists) {
+        setState(() {
+          isFollowingUser = true;
+        });
+      } else {
+        setState(() {
+          isFollowingUser = false;
+        });
+      }
+    });
   }
 
   Future<void> launchUserSocialProfile(String socialLink) async {
@@ -39,8 +67,33 @@ class _ProfileViewState extends State<ProfileView> {
         print('settings');
         break;
       case "Logout":
-        FirebaseAuth.instance.signOut();
-        Get.snackbar("Logged Out", "you are logged out from the app.");
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              actionsPadding: const EdgeInsets.all(0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              content: const Text('Are you sure want to log out?'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      FirebaseAuth.instance.signOut();
+                      Get.snackbar(
+                          'Logged Out', 'You are logged out from the app');
+                    },
+                    child: const Text('Yes')),
+                TextButton(
+                    onPressed: () {
+                      Get.back();
+                    },
+                    child: const Text('No')),
+              ],
+            );
+          },
+        );
+
         break;
       default:
     }
@@ -95,160 +148,224 @@ class _ProfileViewState extends State<ProfileView> {
                   : Container(),
             ],
           ),
-          body: SafeArea(
-              child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 25),
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(
-                    profileController.userMap["userImage"],
+          body: RefreshIndicator(
+            triggerMode: RefreshIndicatorTriggerMode.anywhere,
+            onRefresh: refreshData,
+            child: SafeArea(
+                child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 25),
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage(
+                      profileController.userMap["userImage"],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 90,
-                      child: GestureDetector(
-                        child: Column(
-                          children: [
-                            Text(
-                              profileController.userMap['totalFollowings'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 90,
+                        child: GestureDetector(
+                          child: Column(
+                            children: [
+                              Text(
+                                profileController.userMap['totalFollowings'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Following',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Following',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    SizedBox(
-                      width: 90,
-                      child: GestureDetector(
-                        child: Column(
-                          children: [
-                            Text(
-                              profileController.userMap['totalFollowers'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      const SizedBox(width: 15),
+                      SizedBox(
+                        width: 90,
+                        child: GestureDetector(
+                          child: Column(
+                            children: [
+                              Text(
+                                profileController.userMap['totalFollowers'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Followers',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Followers',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    SizedBox(
-                      width: 90,
-                      child: GestureDetector(
-                        child: Column(
-                          children: [
-                            Text(
-                              profileController.userMap['totalLikes'],
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      const SizedBox(width: 15),
+                      SizedBox(
+                        width: 90,
+                        child: GestureDetector(
+                          child: Column(
+                            children: [
+                              Text(
+                                profileController.userMap['totalLikes'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Likes',
-                              style: TextStyle(fontSize: 12),
-                            ),
-                          ],
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Likes',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 25),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        if (profileController.userMap["userFacebook"] == "") {
-                          Get.snackbar("Facebook Profile",
-                              "This user has not connected his/her profile to facebook yet.");
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  //*follow-unfollow-signout
+                  ElevatedButton(
+                      onPressed: () {
+                        if (widget.visitUserID.toString() == currentUserID) {
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                actionsPadding: const EdgeInsets.all(0),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                content:
+                                    const Text('Are you sure want to log out?'),
+                                actions: [
+                                  TextButton(
+                                      onPressed: () {
+                                        FirebaseAuth.instance.signOut();
+                                        Get.snackbar('Logged Out',
+                                            'You are logged out from the app');
+                                      },
+                                      child: const Text('Yes')),
+                                  TextButton(
+                                      onPressed: () {
+                                        Get.back();
+                                      },
+                                      child: const Text('No')),
+                                ],
+                              );
+                            },
+                          );
                         } else {
-                          launchUserSocialProfile(
-                              profileController.userMap["userFacebook"]);
+                          if (isFollowingUser == true) {
+                            setState(() {
+                              isFollowingUser = false;
+                            });
+                          } else {
+                            setState(() {
+                              isFollowingUser = true;
+                            });
+                          }
+                          profileController.followUnfollowUser();
                         }
                       },
-                      child: Image.asset(
-                        "assets/icons/facebook.png",
-                        width: 24,
+                      style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5))),
+                      child: Text(
+                        widget.visitUserID.toString() == currentUserID
+                            ? "Sign Out"
+                            : isFollowingUser == true
+                                ? "Unfollow"
+                                : 'Follow',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )),
+                  const SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          if (profileController.userMap["userFacebook"] == "") {
+                            Get.snackbar("Facebook Profile",
+                                "This user has not connected his/her profile to facebook yet.");
+                          } else {
+                            launchUserSocialProfile(
+                                profileController.userMap["userFacebook"]);
+                          }
+                        },
+                        child: Image.asset(
+                          "assets/icons/facebook.png",
+                          width: 18,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    GestureDetector(
-                      onTap: () {
-                        if (profileController.userMap["userInstagram"] == "") {
-                          Get.snackbar("Instagram Profile",
-                              "This user has not connected his/her profile to instagram yet.");
-                        } else {
-                          launchUserSocialProfile(
-                              profileController.userMap["userInstagram"]);
-                        }
-                      },
-                      child: Image.asset(
-                        "assets/icons/instagram.png",
-                        width: 24,
+                      const SizedBox(width: 15),
+                      GestureDetector(
+                        onTap: () {
+                          if (profileController.userMap["userInstagram"] ==
+                              "") {
+                            Get.snackbar("Instagram Profile",
+                                "This user has not connected his/her profile to instagram yet.");
+                          } else {
+                            launchUserSocialProfile(
+                                profileController.userMap["userInstagram"]);
+                          }
+                        },
+                        child: Image.asset(
+                          "assets/icons/instagram.png",
+                          width: 18,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    GestureDetector(
-                      onTap: () {
-                        if (profileController.userMap["userTwitter"] == "") {
-                          Get.snackbar("Twitter Profile",
-                              "This user has not connected his/her profile to twitter yet.");
-                        } else {
-                          launchUserSocialProfile(
-                              profileController.userMap["userTwitter"]);
-                        }
-                      },
-                      child: Image.asset(
-                        "assets/icons/twitter.png",
-                        width: 24,
+                      const SizedBox(width: 15),
+                      GestureDetector(
+                        onTap: () {
+                          if (profileController.userMap["userTwitter"] == "") {
+                            Get.snackbar("Twitter Profile",
+                                "This user has not connected his/her profile to twitter yet.");
+                          } else {
+                            launchUserSocialProfile(
+                                profileController.userMap["userTwitter"]);
+                          }
+                        },
+                        child: Image.asset(
+                          "assets/icons/twitter.png",
+                          width: 18,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 15),
-                    GestureDetector(
-                      onTap: () {
-                        if (profileController.userMap["userYoutube"] == "") {
-                          Get.snackbar("Twitter Youtube",
-                              "This user has not connected his/her profile to youtube yet.");
-                        } else {
-                          launchUserSocialProfile(
-                              profileController.userMap["userYoutube"]);
-                        }
-                      },
-                      child: Image.asset(
-                        "assets/icons/youtube.png",
-                        width: 24,
+                      const SizedBox(width: 15),
+                      GestureDetector(
+                        onTap: () {
+                          if (profileController.userMap["userYoutube"] == "") {
+                            Get.snackbar("Twitter Youtube",
+                                "This user has not connected his/her profile to youtube yet.");
+                          } else {
+                            launchUserSocialProfile(
+                                profileController.userMap["userYoutube"]);
+                          }
+                        },
+                        child: Image.asset(
+                          "assets/icons/youtube.png",
+                          width: 18,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          )),
+                    ],
+                  ),
+                ],
+              ),
+            )),
+          ),
         );
       },
     );
