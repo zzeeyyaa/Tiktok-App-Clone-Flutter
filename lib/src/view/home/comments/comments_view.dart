@@ -7,11 +7,12 @@ import 'package:get/get.dart';
 import 'package:tiktok_app_clone_flutter/core/res/app_colors.dart';
 import 'package:tiktok_app_clone_flutter/core/widgets/input_text_field.dart';
 import 'package:tiktok_app_clone_flutter/src/controller/auth_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/profile_controller.dart';
 import 'package:timeago/timeago.dart' as tago;
 
 import 'package:tiktok_app_clone_flutter/src/controller/comments_controller.dart';
 
-class CommentsView extends StatelessWidget {
+class CommentsView extends StatefulWidget {
   CommentsView({
     super.key,
     required this.videoID,
@@ -19,13 +20,30 @@ class CommentsView extends StatelessWidget {
 
   final String videoID;
 
+  @override
+  State<CommentsView> createState() => _CommentsViewState();
+}
+
+class _CommentsViewState extends State<CommentsView> {
   TextEditingController commentTextController = TextEditingController();
+
   CommentsController commentsController = Get.put(CommentsController());
+
   AuthController authController = Get.find<AuthController>();
+
+  ProfileController profileController = Get.put(ProfileController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileController
+        .updateCurrentUserID(FirebaseAuth.instance.currentUser!.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
-    commentsController.updateCurrentVideoID(videoID);
+    commentsController.updateCurrentVideoID(widget.videoID);
     return Scaffold(
       body: SingleChildScrollView(
         child: SizedBox(
@@ -138,12 +156,10 @@ class CommentsView extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(100),
-                        child: Container(
-                          color: AppColors.primaryColor,
-                          height: 35,
-                          width: 35,
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: NetworkImage(
+                          profileController.userMap["userImage"],
                         ),
                       ),
                     ),

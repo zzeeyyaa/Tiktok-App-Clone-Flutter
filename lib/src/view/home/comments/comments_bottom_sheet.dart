@@ -1,16 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
-import 'package:tiktok_app_clone_flutter/core/res/app_colors.dart';
-import 'package:tiktok_app_clone_flutter/src/controller/auth_controller.dart';
-import 'package:tiktok_app_clone_flutter/src/controller/comments_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/profile_controller.dart';
 import 'package:timeago/timeago.dart' as tago;
+import 'package:tiktok_app_clone_flutter/core/res/app_colors.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/comments_controller.dart';
 
 void showCommentBottomSheet(BuildContext context) {
   TextEditingController commentTextController = TextEditingController();
   CommentsController commentsController = Get.put(CommentsController());
+  ProfileController profileController = Get.find<ProfileController>();
 
   showModalBottomSheet(
     enableDrag: true,
@@ -106,7 +105,7 @@ void showCommentBottomSheet(BuildContext context) {
                                       ),
                                     ),
                                     const SizedBox(
-                                      width: 10,
+                                      width: 15,
                                     ),
                                     Text(
                                       "${eachCommentInfo.commentLikesList!.length} likes",
@@ -124,7 +123,7 @@ void showCommentBottomSheet(BuildContext context) {
                                   },
                                   icon: Icon(
                                     Icons.favorite,
-                                    size: 30,
+                                    size: 24,
                                     color: eachCommentInfo.commentLikesList!
                                             .contains(FirebaseAuth
                                                 .instance.currentUser!.uid)
@@ -148,12 +147,17 @@ void showCommentBottomSheet(BuildContext context) {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(10),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
-                          child: Container(
-                            color: AppColors.primaryColor,
-                            height: 35,
-                            width: 35,
+                        // child: ClipRRect(
+                        //   borderRadius: BorderRadius.circular(100),
+                        //   child: Container(
+                        //     color: AppColors.primaryColor,
+                        //     height: 35,
+                        //     width: 35,
+                        //   ),
+                        // ),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(
+                            profileController.userMap["userImage"],
                           ),
                         ),
                       ),

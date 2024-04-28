@@ -8,6 +8,7 @@ import 'package:tiktok_app_clone_flutter/core/widgets/circular_image_animation.d
 import 'package:tiktok_app_clone_flutter/core/widgets/custom_video_player.dart';
 import 'package:tiktok_app_clone_flutter/src/controller/comments_controller.dart';
 import 'package:tiktok_app_clone_flutter/src/controller/for_you_video_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/profile_controller.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/comments/comments_bottom_sheet.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/comments/comments_view.dart';
 
@@ -22,9 +23,19 @@ class _ForYouVideoViewState extends State<ForYouVideoView> {
   ForYouVideoController forYouVideoController =
       Get.put(ForYouVideoController());
   CommentsController commentsController = Get.put(CommentsController());
+  ProfileController profileController = Get.put(ProfileController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    profileController
+        .updateCurrentUserID(FirebaseAuth.instance.currentUser!.uid);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final img = profileController.userMap["userImage"];
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Obx(() {

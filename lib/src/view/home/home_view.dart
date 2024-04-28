@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tiktok_app_clone_flutter/core/utils/global_var.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/following/following_video_view.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/for_you/for_you_video_view.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/profile/profile_view.dart';
@@ -15,12 +16,12 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int screenIndex = 0;
-  List screenList = const [
-    ForYouVideoView(),
-    SearchView(),
-    UploadVideoView(),
-    FollowingVideoView(),
-    ProfileView(),
+  List screenList = [
+    const ForYouVideoView(),
+    const SearchView(),
+    const UploadVideoView(),
+    const FollowingVideoView(),
+    ProfileView(visitUserID: currentUserID),
   ];
 
   @override

@@ -118,6 +118,7 @@ class AuthController extends GetxController {
     } catch (e) {
       Get.snackbar('Error during login', 'Error: $e');
       showProgressBar = false;
+      update();
       throw Exception(e);
     }
   }
