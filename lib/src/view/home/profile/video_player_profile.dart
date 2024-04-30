@@ -1,38 +1,45 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tiktok_app_clone_flutter/core/widgets/circular_image_animation.dart';
 import 'package:tiktok_app_clone_flutter/core/widgets/custom_video_player.dart';
-import 'package:tiktok_app_clone_flutter/src/controller/following_video_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/controller/video_profile_controller.dart';
 import 'package:tiktok_app_clone_flutter/src/view/home/comments/comments_bottom_sheet.dart';
 
-class FollowingVideoView extends StatefulWidget {
-  const FollowingVideoView({super.key});
+class VideoPlayerProfile extends StatefulWidget {
+  VideoPlayerProfile({required this.clickedVideoID, super.key});
+
+  String clickedVideoID;
 
   @override
-  State<FollowingVideoView> createState() => _FollowingVideoViewState();
+  State<VideoPlayerProfile> createState() => _VideoPlayerProfileState();
 }
 
-class _FollowingVideoViewState extends State<FollowingVideoView> {
-  final FollowingVideoController followingVideoController =
-      Get.put(FollowingVideoController());
+class _VideoPlayerProfileState extends State<VideoPlayerProfile> {
+  final VideoProfileController videoProfileController =
+      Get.put(VideoProfileController());
+
   @override
   Widget build(BuildContext context) {
+    videoProfileController.setVideoID(widget.clickedVideoID.toString());
     return Scaffold(
       body: Obx(() {
         return PageView.builder(
-          itemCount: followingVideoController.followingAllVideoList.length,
+          itemCount: videoProfileController.clickedVideoFile.length,
           controller: PageController(initialPage: 0, viewportFraction: 1),
           scrollDirection: Axis.vertical,
           itemBuilder: (context, index) {
-            final eachVideoInfo =
-                followingVideoController.followingAllVideoList[index];
+            final clickedVideoInfo =
+                videoProfileController.clickedVideoFile[index];
+            Uri uri = Uri.parse(clickedVideoInfo.videoUrl!);
 
-            Uri uri = Uri.parse(eachVideoInfo.videoUrl!);
             return Stack(
               children: [
                 CustomVideoPlayer(videoFileUrl: uri),
+
+                //*left and right panel
                 Column(
                   children: [
                     const SizedBox(height: 110),
@@ -53,7 +60,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Text(
-                                    "@${eachVideoInfo.userName}",
+                                    "@${clickedVideoInfo.userName}",
                                     style: GoogleFonts.saira(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
@@ -63,7 +70,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
 
                                   //*description - tags
                                   Text(
-                                    eachVideoInfo.descriptionTags.toString(),
+                                    clickedVideoInfo.descriptionTags.toString(),
                                     style: GoogleFonts.saira(
                                       fontSize: 16,
                                     ),
@@ -80,7 +87,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                       ),
                                       Expanded(
                                         child: Text(
-                                          '  ${eachVideoInfo.artistSongName}',
+                                          '  ${clickedVideoInfo.artistSongName}',
                                           overflow: TextOverflow.ellipsis,
                                         ),
                                       ),
@@ -116,7 +123,8 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                                 BorderRadius.circular(25),
                                             child: Image(
                                               image: NetworkImage(
-                                                eachVideoInfo.userProfileImage
+                                                clickedVideoInfo
+                                                    .userProfileImage
                                                     .toString(),
                                               ),
                                             ),
@@ -132,15 +140,15 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                   children: [
                                     IconButton(
                                       onPressed: () {
-                                        followingVideoController
-                                            .likeOrUnlikeVideo(eachVideoInfo
+                                        videoProfileController
+                                            .likeOrUnlikeVideo(clickedVideoInfo
                                                 .videoID
                                                 .toString());
                                       },
                                       icon: Icon(
                                         Icons.favorite_rounded,
                                         size: 32,
-                                        color: eachVideoInfo.likesList!
+                                        color: clickedVideoInfo.likesList!
                                                 .contains(FirebaseAuth
                                                     .instance.currentUser!.uid)
                                             ? const Color.fromARGB(
@@ -151,7 +159,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
 
                                     //*total likes
                                     Text(
-                                      eachVideoInfo.likesList!.length
+                                      clickedVideoInfo.likesList!.length
                                           .toString(),
                                       style: const TextStyle(
                                         fontSize: 16,
@@ -166,6 +174,8 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                   children: [
                                     IconButton(
                                       onPressed: () {
+                                        // commentsController.updateCurrentVideoID(
+                                        //     clickedVideoInfo.videoID.toString());
                                         // Get.to(
                                         //   CommentsView(
                                         //     videoID: eachVideoInfo.videoID
@@ -183,7 +193,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
 
                                     //total comment
                                     Text(
-                                      eachVideoInfo.totalComments.toString(),
+                                      clickedVideoInfo.totalComments.toString(),
                                       style: const TextStyle(
                                         fontSize: 16,
                                         color: Colors.white,
@@ -204,7 +214,7 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                       ),
                                     ),
                                     Text(
-                                      eachVideoInfo.totalShares.toString(),
+                                      clickedVideoInfo.totalShares.toString(),
                                       style: const TextStyle(
                                         fontSize: 16,
                                         color: Colors.white,
@@ -240,7 +250,8 @@ class _FollowingVideoViewState extends State<FollowingVideoView> {
                                                 BorderRadius.circular(25),
                                             child: Image(
                                               image: NetworkImage(
-                                                eachVideoInfo.userProfileImage
+                                                clickedVideoInfo
+                                                    .userProfileImage
                                                     .toString(),
                                               ),
                                               fit: BoxFit.cover,

@@ -3,10 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:tiktok_app_clone_flutter/core/utils/global_var.dart';
 import 'package:tiktok_app_clone_flutter/src/controller/profile_controller.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/profile/refactors/followers_view.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/profile/refactors/following_view.dart';
+import 'package:tiktok_app_clone_flutter/src/view/home/profile/video_player_profile.dart';
+import 'package:tiktok_app_clone_flutter/src/view/settings/account_settings_view.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ProfileView extends StatefulWidget {
@@ -64,8 +69,7 @@ class _ProfileViewState extends State<ProfileView> {
   handleClickEvent(String choiceClicked) {
     switch (choiceClicked) {
       case 'Settings':
-        print('settings');
-        break;
+        Get.to(const AccountSettingView());
       case "Logout":
         showDialog(
           context: context,
@@ -82,6 +86,13 @@ class _ProfileViewState extends State<ProfileView> {
                       FirebaseAuth.instance.signOut();
                       Get.snackbar(
                           'Logged Out', 'You are logged out from the app');
+                      Future.delayed(
+                        const Duration(milliseconds: 1000),
+                        () {
+                          SystemChannels.platform
+                              .invokeMethod("SystemNavigator.pop");
+                        },
+                      );
                     },
                     child: const Text('Yes')),
                 TextButton(
@@ -93,9 +104,23 @@ class _ProfileViewState extends State<ProfileView> {
             );
           },
         );
-
-        break;
       default:
+    }
+  }
+
+  readClickedThumbnailInfo(String clickedThumbnailUrl) async {
+    var allVideoDocs =
+        await FirebaseFirestore.instance.collection('videos').get();
+
+    for (var i = 0; i < allVideoDocs.docs.length; i++) {
+      if (((allVideoDocs.docs[i].data() as dynamic)['thumbnailUrl']) ==
+          clickedThumbnailUrl) {
+        Get.to(
+          () => VideoPlayerProfile(
+              clickedVideoID:
+                  (allVideoDocs.docs[i].data() as dynamic)['videoID']),
+        );
+      }
     }
   }
 
@@ -169,6 +194,11 @@ class _ProfileViewState extends State<ProfileView> {
                       SizedBox(
                         width: 90,
                         child: GestureDetector(
+                          onTap: () {
+                            Get.to(() => FollowingView(
+                                visitedProfileUserID:
+                                    widget.visitUserID.toString()));
+                          },
                           child: Column(
                             children: [
                               Text(
@@ -191,6 +221,11 @@ class _ProfileViewState extends State<ProfileView> {
                       SizedBox(
                         width: 90,
                         child: GestureDetector(
+                          onTap: () {
+                            Get.to(() => FollowersView(
+                                visitedProfileUserID:
+                                    widget.visitUserID.toString()));
+                          },
                           child: Column(
                             children: [
                               Text(
@@ -254,6 +289,14 @@ class _ProfileViewState extends State<ProfileView> {
                                         FirebaseAuth.instance.signOut();
                                         Get.snackbar('Logged Out',
                                             'You are logged out from the app');
+                                        Future.delayed(
+                                          const Duration(milliseconds: 1000),
+                                          () {
+                                            SystemChannels.platform
+                                                .invokeMethod(
+                                                    "SystemNavigator.pop");
+                                          },
+                                        );
                                       },
                                       child: const Text('Yes')),
                                   TextButton(
@@ -280,7 +323,7 @@ class _ProfileViewState extends State<ProfileView> {
                       },
                       style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5))),
+                              borderRadius: BorderRadius.circular(10))),
                       child: Text(
                         widget.visitUserID.toString() == currentUserID
                             ? "Sign Out"
@@ -361,6 +404,35 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  //*user's video - thumbnails
+                  GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount:
+                        profileController.userMap["thumbnailsList"].length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      childAspectRatio: .7,
+                      crossAxisSpacing: 1,
+                    ),
+                    itemBuilder: (context, index) {
+                      String eachThumbnailUrl =
+                          profileController.userMap["thumbnailsList"][index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          readClickedThumbnailInfo(eachThumbnailUrl);
+                        },
+                        child: Image.network(
+                          eachThumbnailUrl,
+                          fit: BoxFit.cover,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
